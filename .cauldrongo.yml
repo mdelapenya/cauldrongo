@@ -1,0 +1,11 @@
+projects:
+- id: 2296
+  name: testcontainers-go
+- id: 7264
+  name: testcontainers-java
+- id: 7265
+  name: testcontainers-dotnet
+- id: 7266
+  name: testcontainers-node
+- id: 7607
+  name: testcontainers-node
