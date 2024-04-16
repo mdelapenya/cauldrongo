@@ -8,11 +8,20 @@ import (
 )
 
 const (
-	BaseScheme               = "https"
-	BaseURL                  = "cauldron.io"
-	MetricsURLFormat         = "/project/%d/metrics"
-	MetricsQueryStringFormat = "from=%s&to=%s&tab=%s"
+	baseScheme               = "https"
+	baseURL                  = "cauldron.io"
+	metricsURLFormat         = "/project/%d/metrics"
+	metricsQueryStringFormat = "from=%s&to=%s&tab=%s"
 )
+
+func NewURL(projectID int, from, to, tab string) url.URL {
+	return url.URL{
+		Scheme:   baseScheme,
+		Host:     baseURL,
+		Path:     fmt.Sprintf(metricsURLFormat, projectID),
+		RawQuery: fmt.Sprintf(metricsQueryStringFormat, from, to, tab),
+	}
+}
 
 func HttpRequest(url *url.URL) (io.Reader, error) {
 	httpCli := http.Client{}

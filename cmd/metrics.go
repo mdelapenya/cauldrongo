@@ -40,32 +40,12 @@ var cmdMetrics = &cobra.Command{
 	Long: `Fetch metrics for a given project. It will return the metrics for the
 				  project in the requested format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		overviewURL := url.URL{
-			Scheme:   cauldron.BaseScheme,
-			Host:     cauldron.BaseURL,
-			Path:     fmt.Sprintf(cauldron.MetricsURLFormat, projectID),
-			RawQuery: fmt.Sprintf(cauldron.MetricsQueryStringFormat, from, to, tab),
-		}
+		overviewURL := cauldron.NewURL(projectID, from, to, tab)
 		urls := []url.URL{overviewURL}
 		if tab == "" {
-			urls = append(urls, url.URL{
-				Scheme:   cauldron.BaseScheme,
-				Host:     cauldron.BaseURL,
-				Path:     fmt.Sprintf(cauldron.MetricsURLFormat, projectID),
-				RawQuery: fmt.Sprintf(cauldron.MetricsQueryStringFormat, from, to, "activity-overview"),
-			})
-			urls = append(urls, url.URL{
-				Scheme:   cauldron.BaseScheme,
-				Host:     cauldron.BaseURL,
-				Path:     fmt.Sprintf(cauldron.MetricsURLFormat, projectID),
-				RawQuery: fmt.Sprintf(cauldron.MetricsQueryStringFormat, from, to, "community-overview"),
-			})
-			urls = append(urls, url.URL{
-				Scheme:   cauldron.BaseScheme,
-				Host:     cauldron.BaseURL,
-				Path:     fmt.Sprintf(cauldron.MetricsURLFormat, projectID),
-				RawQuery: fmt.Sprintf(cauldron.MetricsQueryStringFormat, from, to, "performance-overview"),
-			})
+			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))
+			urls = append(urls, cauldron.NewURL(projectID, from, to, "community-overview"))
+			urls = append(urls, cauldron.NewURL(projectID, from, to, "erformance-overview"))
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
