@@ -9,17 +9,18 @@ import (
 )
 
 type Formatter interface {
-	Format(io.Writer, Printable) error
-	FormatHeader(io.Writer) error
+	Format(Printable) error
+	FormatHeader() error
 }
 
 type ConsoleFormatter struct {
-	From string
-	To   string
+	From   string
+	To     string
+	Writer io.Writer
 }
 
-func (c *ConsoleFormatter) Format(w io.Writer, p Printable) error {
-	table := tablewriter.NewWriter(w)
+func (c *ConsoleFormatter) Format(p Printable) error {
+	table := tablewriter.NewWriter(c.Writer)
 
 	table.SetHeader(p.Headers())
 	table.SetAutoWrapText(false)
@@ -33,9 +34,9 @@ func (c *ConsoleFormatter) Format(w io.Writer, p Printable) error {
 	return nil
 }
 
-func (c *ConsoleFormatter) FormatHeader(w io.Writer) error {
-	fmt.Fprintf(w, "From: %s\n", c.From)
-	fmt.Fprintf(w, "To: %s\n", c.To)
+func (c *ConsoleFormatter) FormatHeader() error {
+	fmt.Fprintf(c.Writer, "From: %s\n", c.From)
+	fmt.Fprintf(c.Writer, "To: %s\n", c.To)
 	return nil
 }
 
@@ -43,9 +44,10 @@ type JSONFormatter struct {
 	Indent string
 	From   string
 	To     string
+	Writer io.Writer
 }
 
-func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
+func (j *JSONFormatter) Format(p Printable) error {
 	if j.Indent == "" {
 		// default is 2 spaces
 		j.Indent = "  "
@@ -58,11 +60,11 @@ func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
 
 	bs = append(bs, '\n')
 
-	_, err = w.Write(bs)
+	_, err = j.Writer.Write(bs)
 	return err
 }
 
-func (j *JSONFormatter) FormatHeader(w io.Writer) error {
+func (j *JSONFormatter) FormatHeader() error {
 	if j.Indent == "" {
 		// default is 2 spaces
 		j.Indent = "  "
@@ -79,6 +81,6 @@ func (j *JSONFormatter) FormatHeader(w io.Writer) error {
 	}
 
 	bs = append(bs, '\n')
-	_, err = w.Write(bs)
+	_, err = j.Writer.Write(bs)
 	return err
 }

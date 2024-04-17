@@ -57,17 +57,19 @@ var cmdMetrics = &cobra.Command{
 		switch format {
 		case "json":
 			formatter = &cauldron.JSONFormatter{
-				From: from,
-				To:   to,
+				From:   from,
+				To:     to,
+				Writer: os.Stdout,
 			}
 		default:
 			formatter = &cauldron.ConsoleFormatter{
-				From: from,
-				To:   to,
+				From:   from,
+				To:     to,
+				Writer: os.Stdout,
 			}
 		}
 
-		formatter.FormatHeader(os.Stdout)
+		formatter.FormatHeader()
 
 		if err := metricsRun(projectIDs, formatter, from, to, tab); err != nil {
 			fmt.Println(err)
@@ -77,6 +79,8 @@ var cmdMetrics = &cobra.Command{
 }
 
 func metricsRun(projectIDs []int, formatter cauldron.Formatter, from string, to string, tab string) error {
+	formatter.FormatHeader()
+
 	for _, projectID := range projectIDs {
 		overviewURL := cauldron.NewURL(projectID, from, to, tab)
 		urls := []url.URL{overviewURL}
@@ -140,7 +144,7 @@ func metricsRun(projectIDs []int, formatter cauldron.Formatter, from string, to 
 				return fmt.Errorf("error unmarshalling metrics: %w", err)
 			}
 
-			if err := formatter.Format(os.Stdout, printable); err != nil {
+			if err := formatter.Format(printable); err != nil {
 				return fmt.Errorf("error formatting metrics: %w", err)
 			}
 		}

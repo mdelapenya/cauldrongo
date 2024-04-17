@@ -17,8 +17,6 @@ func (w *testWriter) Write(p []byte) (n int, err error) {
 }
 
 func TestConsoleFormatter(t *testing.T) {
-	consoleFormatter := &cauldron.ConsoleFormatter{}
-
 	tests := []struct {
 		name      string
 		printable cauldron.Printable
@@ -123,7 +121,11 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			err := consoleFormatter.Format(tt.writer, tt.printable)
+			consoleFormatter := &cauldron.ConsoleFormatter{
+				Writer: tt.writer,
+			}
+
+			err := consoleFormatter.Format(tt.printable)
 			if err != nil {
 				innerT.Fatalf("error formatting: %v", err)
 			}
@@ -137,17 +139,42 @@ func TestConsoleFormatter(t *testing.T) {
 	}
 }
 
+func TestConsoleFormatterHeader(t *testing.T) {
+	w := &testWriter{}
+
+	consoleFormatter := &cauldron.ConsoleFormatter{
+		Writer: w,
+		From:   "2021-01-01",
+		To:     "2021-12-31",
+	}
+
+	err := consoleFormatter.FormatHeader()
+	if err != nil {
+		t.Fatalf("error formatting header: %v", err)
+	}
+
+	formatted := string(w.data)
+
+	expected := `From: 2021-01-01
+To: 2021-12-31
+`
+
+	if formatted != expected {
+		t.Fatalf("expected %s but got %s", expected, formatted)
+	}
+}
+
 func TestJSONFormatter(t *testing.T) {
+	w := &testWriter{}
 	jsonFormatter := &cauldron.JSONFormatter{
 		Indent: "	",
+		Writer: w,
 	}
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
 
-	w := &testWriter{}
-
-	err := jsonFormatter.Format(w, a)
+	err := jsonFormatter.Format(a)
 	if err != nil {
 		t.Fatalf("error formatting: %v", err)
 	}
@@ -178,5 +205,32 @@ func TestJSONFormatter(t *testing.T) {
 
 	if a.CommitsActivityOverview != a2.CommitsActivityOverview {
 		t.Fatalf("expected CommitsActivityOverview=%d but got %d", a.CommitsActivityOverview, a2.CommitsActivityOverview)
+	}
+}
+
+func TestJSONFormatterHeader(t *testing.T) {
+	w := &testWriter{}
+
+	jsonFormatter := &cauldron.JSONFormatter{
+		From:   "2021-01-01",
+		To:     "2021-12-31",
+		Writer: w,
+	}
+
+	err := jsonFormatter.FormatHeader()
+	if err != nil {
+		t.Fatalf("error formatting header: %v", err)
+	}
+
+	formatted := string(w.data)
+
+	expected := `{
+  "from": "2021-01-01",
+  "to": "2021-12-31"
+}
+`
+
+	if formatted != expected {
+		t.Fatalf("expected %s but got %s", expected, formatted)
 	}
 }
