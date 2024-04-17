@@ -23,7 +23,7 @@ func NewURL(projectID int, from, to, tab string) url.URL {
 	}
 }
 
-func HttpRequest(url *url.URL) (io.Reader, error) {
+func HttpRequest(url *url.URL) (io.ReadCloser, error) {
 	httpCli := http.Client{}
 
 	req, err := http.NewRequest("GET", url.String(), nil)

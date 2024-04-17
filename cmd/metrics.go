@@ -61,7 +61,7 @@ var cmdMetrics = &cobra.Command{
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
 		// and printing them
 
-		responses := make(chan io.Reader, len(urls))
+		responses := make(chan io.ReadCloser, len(urls))
 
 		errorGroup := errgroup.Group{}
 		for _, u := range urls {
@@ -86,6 +86,7 @@ var cmdMetrics = &cobra.Command{
 		// process all responses
 		for i := 0; i < len(urls); i++ {
 			reader := <-responses
+			defer reader.Close()
 
 			var processor cauldron.Processor
 			u := urls[i]
