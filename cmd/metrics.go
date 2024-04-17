@@ -105,13 +105,11 @@ var cmdMetrics = &cobra.Command{
 				os.Exit(1)
 			}
 
-			result, err := formatter.Format(processor)
+			err := formatter.Format(os.Stdout, processor)
 			if err != nil {
 				fmt.Printf("Error formatting metrics: %v\n", err)
 				os.Exit(1)
 			}
-
-			fmt.Println(result)
 		}
 	},
 }

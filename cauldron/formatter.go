@@ -3,23 +3,25 @@ package cauldron
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 type Formatter interface {
-	Format(Processor) (string, error)
+	Format(io.Writer, Processor) error
 }
 
 type ConsoleFormatter struct{}
 
-func (c *ConsoleFormatter) Format(p Processor) (string, error) {
-	return fmt.Sprintf("%+v", p), nil
+func (c *ConsoleFormatter) Format(w io.Writer, p Processor) error {
+	_, err := w.Write([]byte(fmt.Sprintf("%+v", p)))
+	return err
 }
 
 type JSONFormatter struct {
 	Indent string
 }
 
-func (j *JSONFormatter) Format(p Processor) (string, error) {
+func (j *JSONFormatter) Format(w io.Writer, p Processor) error {
 	if j.Indent == "" {
 		// default is 2 spaces
 		j.Indent = "  "
@@ -27,8 +29,9 @@ func (j *JSONFormatter) Format(p Processor) (string, error) {
 
 	bs, err := json.MarshalIndent(p, "", j.Indent)
 	if err != nil {
-		return "", fmt.Errorf("error marshalling JSON: %w", err)
+		return fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
-	return string(bs), nil
+	_, err = w.Write(bs)
+	return err
 }

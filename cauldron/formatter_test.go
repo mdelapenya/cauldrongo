@@ -7,16 +7,28 @@ import (
 	"github.com/mdelapenya/cauldrongo/cauldron"
 )
 
+type testWriter struct {
+	data []byte
+}
+
+func (w *testWriter) Write(p []byte) (n int, err error) {
+	w.data = p
+	return len(p), nil
+}
+
 func TestConsoleFormatter(t *testing.T) {
 	consoleFormatter := &cauldron.ConsoleFormatter{}
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
 
-	formatted, err := consoleFormatter.Format(a)
+	w := &testWriter{}
+	err := consoleFormatter.Format(w, a)
 	if err != nil {
 		t.Fatalf("error formatting: %v", err)
 	}
+
+	formatted := string(w.data)
 
 	expected := "&{CommitsActivityOverview:15 LinesCommitActivityOverview: LinesCommitFileActivityOverview: IssuesCreatedActivityOverview:0 IssuesClosedActivityOverview:0 IssuesOpenActivityOverview:0 ReviewsCreatedActivityOverview:0 ReviewsClosedActivityOverview:0 ReviewsOpenActivityOverview:0}"
 	if formatted != expected {
@@ -32,10 +44,14 @@ func TestJSONFormatter(t *testing.T) {
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
 
-	formatted, err := jsonFormatter.Format(a)
+	w := &testWriter{}
+
+	err := jsonFormatter.Format(w, a)
 	if err != nil {
 		t.Fatalf("error formatting: %v", err)
 	}
+
+	formatted := string(w.data)
 
 	// the indent is 1 tab
 	expected := `{
