@@ -165,7 +165,8 @@ func TestJSONFormatter(t *testing.T) {
 	"reviews_created_activity_overview": 0,
 	"reviews_closed_activity_overview": 0,
 	"reviews_open_activity_overview": 0
-}`
+}
+`
 	if formatted != expected {
 		t.Fatalf("expected %s but got %s", expected, formatted)
 	}

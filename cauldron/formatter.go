@@ -44,6 +44,8 @@ func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
 		return fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
+	bs = append(bs, '\n')
+
 	_, err = w.Write(bs)
 	return err
 }
