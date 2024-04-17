@@ -17,6 +17,7 @@ var projectID int
 var from string
 var to string
 var tab string
+var format string
 
 func init() {
 	now := time.Now()
@@ -26,10 +27,11 @@ func init() {
 	formattedNow := now.Format("2006-01-02")
 	formattedYearAgo := yearAgo.Format("2006-01-02")
 
-	cmdMetrics.Flags().IntVarP(&projectID, "project-id", "p", 0, "The project ID to fetch metrics")
-	cmdMetrics.Flags().StringVarP(&from, "from", "f", formattedYearAgo, "The start date to fetch metrics")
-	cmdMetrics.Flags().StringVarP(&to, "to", "t", formattedNow, "The end date to fetch metrics")
-	cmdMetrics.Flags().StringVarP(&tab, "tab", "b", "", "The tab to fetch metrics. Possible values are: overview, activity-overview, community-overview, performance-overview. If empty, it will fetch the overview tab.")
+	cmdMetrics.Flags().IntVarP(&projectID, "project-id", "p", 0, "The project ID to fetch metrics. Required.")
+	cmdMetrics.Flags().StringVarP(&from, "from", "f", formattedYearAgo, "The start date to fetch metrics. Default is one year ago.")
+	cmdMetrics.Flags().StringVarP(&to, "to", "t", formattedNow, "The end date to fetch metrics. Default is today.")
+	cmdMetrics.Flags().StringVarP(&tab, "tab", "b", "", "The tab to fetch metrics. Possible values are: overview, activity-overview, community-overview, performance-overview. Default is overview.")
+	cmdMetrics.Flags().StringVarP(&format, "format", "F", "console", "The format to output the metrics. Possible values are: console and json. Default is console.")
 
 	rootCmd.AddCommand(cmdMetrics)
 }
@@ -46,6 +48,14 @@ var cmdMetrics = &cobra.Command{
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "community-overview"))
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "erformance-overview"))
+		}
+
+		var formatter cauldron.Formatter
+		switch format {
+		case "json":
+			formatter = &cauldron.JSONFormatter{}
+		default:
+			formatter = &cauldron.ConsoleFormatter{}
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
@@ -90,13 +100,18 @@ var cmdMetrics = &cobra.Command{
 				processor = &cauldron.Overview{}
 			}
 
-			err := processor.Process(reader)
-			if err != nil {
+			if err := processor.Process(reader); err != nil {
 				fmt.Printf("Error processing metrics: %v\n", err)
 				os.Exit(1)
 			}
 
-			fmt.Printf("Metrics processed successfully: %+v\n", processor)
+			result, err := formatter.Format(processor)
+			if err != nil {
+				fmt.Printf("Error formatting metrics: %v\n", err)
+				os.Exit(1)
+			}
+
+			fmt.Println(result)
 		}
 	},
 }
