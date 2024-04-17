@@ -70,8 +70,6 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 			formatter = cauldron.NewConsoleFormatter(p, from, to, os.Stdout)
 		}
 
-		formatter.FormatHeader()
-
 		overviewURL := cauldron.NewURL(p.ID, from, to, tab)
 		urls := []url.URL{overviewURL}
 		if tab == "" {

@@ -11,7 +11,6 @@ import (
 
 type Formatter interface {
 	Format(Printable) error
-	FormatHeader() error
 }
 
 func NewConsoleFormatter(p project.Project, from string, to string, w io.Writer) *consoleFormatter {
@@ -31,6 +30,10 @@ type consoleFormatter struct {
 }
 
 func (c *consoleFormatter) Format(p Printable) error {
+	fmt.Fprintf(c.Writer, "Project: %s (%d)\n", c.Project.Name, c.Project.ID)
+	fmt.Fprintf(c.Writer, "From: %s\n", c.From)
+	fmt.Fprintf(c.Writer, "To: %s\n", c.To)
+
 	table := tablewriter.NewWriter(c.Writer)
 
 	var headers = []string{
@@ -47,13 +50,6 @@ func (c *consoleFormatter) Format(p Printable) error {
 	}
 
 	table.Render()
-	return nil
-}
-
-func (c *consoleFormatter) FormatHeader() error {
-	fmt.Fprintf(c.Writer, "Project: %s (%d)\n", c.Project.Name, c.Project.ID)
-	fmt.Fprintf(c.Writer, "From: %s\n", c.From)
-	fmt.Fprintf(c.Writer, "To: %s\n", c.To)
 	return nil
 }
 
@@ -79,47 +75,33 @@ type jsonFormatter struct {
 	Project project.Project
 }
 
+type JSONResponse struct {
+	Project  project.Project `json:"project"`
+	From     string          `json:"from"`
+	To       string          `json:"to"`
+	Response Printable       `json:"response"`
+}
+
 func (j *jsonFormatter) Format(p Printable) error {
 	if j.Indent == "" {
 		// default is 2 spaces
 		j.Indent = "  "
 	}
 
-	bs, err := json.MarshalIndent(p, "", j.Indent)
+	resp := JSONResponse{
+		Project:  j.Project,
+		From:     j.From,
+		To:       j.To,
+		Response: p,
+	}
+
+	bs, err := json.MarshalIndent(resp, "", j.Indent)
 	if err != nil {
 		return fmt.Errorf("error marshalling JSON: %w", err)
 	}
 
 	bs = append(bs, '\n')
 
-	_, err = j.Writer.Write(bs)
-	return err
-}
-
-func (j *jsonFormatter) FormatHeader() error {
-	if j.Indent == "" {
-		// default is 2 spaces
-		j.Indent = "  "
-	}
-
-	type h struct {
-		Project project.Project `json:"project"`
-		From    string          `json:"from"`
-		To      string          `json:"to"`
-	}
-
-	header := h{
-		Project: j.Project,
-		From:    j.From,
-		To:      j.To,
-	}
-
-	bs, err := json.MarshalIndent(header, "", j.Indent)
-	if err != nil {
-		return fmt.Errorf("error marshalling header: %w", err)
-	}
-
-	bs = append(bs, '\n')
 	_, err = j.Writer.Write(bs)
 	return err
 }
