@@ -10,9 +10,13 @@ import (
 
 type Formatter interface {
 	Format(io.Writer, Printable) error
+	FormatHeader(io.Writer) error
 }
 
-type ConsoleFormatter struct{}
+type ConsoleFormatter struct {
+	From string
+	To   string
+}
 
 func (c *ConsoleFormatter) Format(w io.Writer, p Printable) error {
 	table := tablewriter.NewWriter(w)
@@ -29,8 +33,16 @@ func (c *ConsoleFormatter) Format(w io.Writer, p Printable) error {
 	return nil
 }
 
+func (c *ConsoleFormatter) FormatHeader(w io.Writer) error {
+	fmt.Fprintf(w, "From: %s\n", c.From)
+	fmt.Fprintf(w, "To: %s\n", c.To)
+	return nil
+}
+
 type JSONFormatter struct {
 	Indent string
+	From   string
+	To     string
 }
 
 func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
@@ -46,6 +58,27 @@ func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
 
 	bs = append(bs, '\n')
 
+	_, err = w.Write(bs)
+	return err
+}
+
+func (j *JSONFormatter) FormatHeader(w io.Writer) error {
+	if j.Indent == "" {
+		// default is 2 spaces
+		j.Indent = "  "
+	}
+
+	header := map[string]string{
+		"from": j.From,
+		"to":   j.To,
+	}
+
+	bs, err := json.MarshalIndent(header, "", j.Indent)
+	if err != nil {
+		return fmt.Errorf("error marshalling header: %w", err)
+	}
+
+	bs = append(bs, '\n')
 	_, err = w.Write(bs)
 	return err
 }

@@ -56,10 +56,18 @@ var cmdMetrics = &cobra.Command{
 		var formatter cauldron.Formatter
 		switch format {
 		case "json":
-			formatter = &cauldron.JSONFormatter{}
+			formatter = &cauldron.JSONFormatter{
+				From: from,
+				To:   to,
+			}
 		default:
-			formatter = &cauldron.ConsoleFormatter{}
+			formatter = &cauldron.ConsoleFormatter{
+				From: from,
+				To:   to,
+			}
 		}
+
+		formatter.FormatHeader(os.Stdout)
 
 		if err := metricsRun(projectIDs, formatter, from, to, tab); err != nil {
 			fmt.Println(err)
