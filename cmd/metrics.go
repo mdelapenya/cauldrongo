@@ -53,14 +53,22 @@ var cmdMetrics = &cobra.Command{
 			}
 		}
 
-		if err := metricsRun(projectIDs, from, to, tab); err != nil {
+		var formatter cauldron.Formatter
+		switch format {
+		case "json":
+			formatter = &cauldron.JSONFormatter{}
+		default:
+			formatter = &cauldron.ConsoleFormatter{}
+		}
+
+		if err := metricsRun(projectIDs, formatter, from, to, tab); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	},
 }
 
-func metricsRun(projectIDs []int, from string, to string, tab string) error {
+func metricsRun(projectIDs []int, formatter cauldron.Formatter, from string, to string, tab string) error {
 	for _, projectID := range projectIDs {
 		overviewURL := cauldron.NewURL(projectID, from, to, tab)
 		urls := []url.URL{overviewURL}
@@ -68,14 +76,6 @@ func metricsRun(projectIDs []int, from string, to string, tab string) error {
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "community-overview"))
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "erformance-overview"))
-		}
-
-		var formatter cauldron.Formatter
-		switch format {
-		case "json":
-			formatter = &cauldron.JSONFormatter{}
-		default:
-			formatter = &cauldron.ConsoleFormatter{}
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
