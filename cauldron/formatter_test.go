@@ -121,9 +121,7 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			consoleFormatter := &cauldron.ConsoleFormatter{
-				Writer: tt.writer,
-			}
+			consoleFormatter := cauldron.NewConsoleFormatter("2021-01-01", "2021-12-31", tt.writer)
 
 			err := consoleFormatter.Format(tt.printable)
 			if err != nil {
@@ -142,11 +140,7 @@ func TestConsoleFormatter(t *testing.T) {
 func TestConsoleFormatterHeader(t *testing.T) {
 	w := &testWriter{}
 
-	consoleFormatter := &cauldron.ConsoleFormatter{
-		Writer: w,
-		From:   "2021-01-01",
-		To:     "2021-12-31",
-	}
+	consoleFormatter := cauldron.NewConsoleFormatter("2021-01-01", "2021-12-31", w)
 
 	err := consoleFormatter.FormatHeader()
 	if err != nil {
@@ -166,10 +160,8 @@ To: 2021-12-31
 
 func TestJSONFormatter(t *testing.T) {
 	w := &testWriter{}
-	jsonFormatter := &cauldron.JSONFormatter{
-		Indent: "	",
-		Writer: w,
-	}
+	// using tab as indent
+	jsonFormatter := cauldron.NewJSONFormatter("2021-01-01", "2021-12-31", "	", w)
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
@@ -181,7 +173,7 @@ func TestJSONFormatter(t *testing.T) {
 
 	formatted := string(w.data)
 
-	// the indent is 1 tab
+	// the indent is 2 ep
 	expected := `{
 	"commits_activity_overview": 15,
 	"lines_commit_activity_overview": "",
@@ -211,11 +203,8 @@ func TestJSONFormatter(t *testing.T) {
 func TestJSONFormatterHeader(t *testing.T) {
 	w := &testWriter{}
 
-	jsonFormatter := &cauldron.JSONFormatter{
-		From:   "2021-01-01",
-		To:     "2021-12-31",
-		Writer: w,
-	}
+	// using empty indent to verify the default indent of 2 spaces
+	jsonFormatter := cauldron.NewJSONFormatter("2021-01-01", "2021-12-31", "", w)
 
 	err := jsonFormatter.FormatHeader()
 	if err != nil {
