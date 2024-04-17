@@ -70,12 +70,14 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 			formatter = cauldron.NewConsoleFormatter(p, from, to, os.Stdout)
 		}
 
-		overviewURL := cauldron.NewURL(p.ID, from, to, tab)
-		urls := []url.URL{overviewURL}
+		cauldronURL := cauldron.NewURL(p.ID, from, to, tab)
+		urls := []url.URL{cauldronURL}
 		if tab == "" {
+			urls = make([]url.URL, 0, 4)
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "community-overview"))
-			urls = append(urls, cauldron.NewURL(projectID, from, to, "erformance-overview"))
+			urls = append(urls, cauldron.NewURL(projectID, from, to, "overview"))
+			urls = append(urls, cauldron.NewURL(projectID, from, to, "performance-overview"))
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
