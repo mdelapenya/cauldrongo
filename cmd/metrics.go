@@ -13,6 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 
 	"github.com/mdelapenya/cauldrongo/cauldron"
+	"github.com/mdelapenya/cauldrongo/project"
 )
 
 var projectID int
@@ -44,37 +45,34 @@ var cmdMetrics = &cobra.Command{
 	Long: `Fetch metrics for a given project. It will return the metrics for the
 				  project in the requested format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		projectIDs := []int{projectID}
+		runProjects := []project.Project{{ID: projectID}}
 		if len(projects) > 0 {
 			fmt.Printf("Ignoring project ID %d, as the configuration file contains projects.\n", projectID)
 			fmt.Printf("%+v\n", projects)
 			// if the configuration file contains projects, we will ignore the projectID flag
-			projectIDs = []int{}
-			for _, p := range projects {
-				projectIDs = append(projectIDs, p.ID)
-			}
+			runProjects = projects
 		}
 
-		var formatter cauldron.Formatter
-		switch format {
-		case "json":
-			formatter = cauldron.NewJSONFormatter(from, to, "  ", os.Stdout)
-		default:
-			formatter = cauldron.NewConsoleFormatter(from, to, os.Stdout)
-		}
-
-		if err := metricsRun(projectIDs, formatter, from, to, tab); err != nil {
+		if err := metricsRun(runProjects, from, to, tab); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	},
 }
 
-func metricsRun(projectIDs []int, formatter cauldron.Formatter, from string, to string, tab string) error {
-	formatter.FormatHeader()
+func metricsRun(projects []project.Project, from string, to string, tab string) error {
+	for _, p := range projects {
+		var formatter cauldron.Formatter
+		switch format {
+		case "json":
+			formatter = cauldron.NewJSONFormatter(p, from, to, "  ", os.Stdout)
+		default:
+			formatter = cauldron.NewConsoleFormatter(p, from, to, os.Stdout)
+		}
 
-	for _, projectID := range projectIDs {
-		overviewURL := cauldron.NewURL(projectID, from, to, tab)
+		formatter.FormatHeader()
+
+		overviewURL := cauldron.NewURL(p.ID, from, to, tab)
 		urls := []url.URL{overviewURL}
 		if tab == "" {
 			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))

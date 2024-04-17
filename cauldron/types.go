@@ -4,11 +4,6 @@ import (
 	"fmt"
 )
 
-var headers = []string{
-	"Metric",
-	"Value",
-}
-
 /*
 	{
 	    "commits_activity_overview": 15,
@@ -48,10 +43,6 @@ func (a *Activity) Data() [][]string {
 	}
 }
 
-func (a *Activity) Headers() []string {
-	return headers
-}
-
 /*
 	{
 		"active_people_git_community_overview": 8,
@@ -80,10 +71,6 @@ func (c *Community) Data() [][]string {
 		{"Onboardings Issues Community Overview", fmt.Sprintf("%d", c.OnboardingsIssuesCommunityOverview)},
 		{"Onboardings Patches Community Overview", fmt.Sprintf("%d", c.OnboardingsPatchesCommunityOverview)},
 	}
-}
-
-func (c *Community) Headers() []string {
-	return headers
 }
 
 /*
@@ -190,10 +177,6 @@ func (o *Overview) Data() [][]string {
 	}
 }
 
-func (o *Overview) Headers() []string {
-	return headers
-}
-
 /*
 	{
 	    "issues_time_open_average_performance_overview": 272.41,
@@ -222,8 +205,4 @@ func (p *Performance) Data() [][]string {
 		{"Reviews Time Open Median Performance Overview", fmt.Sprintf("%.2f", p.ReviewsTimeOpenMedianPerformanceOverview)},
 		{"Open Reviews Performance Overview", fmt.Sprintf("%d", p.OpenReviewsPerformanceOverview)},
 	}
-}
-
-func (p *Performance) Headers() []string {
-	return headers
 }

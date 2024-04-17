@@ -5,7 +5,10 @@ import (
 	"testing"
 
 	"github.com/mdelapenya/cauldrongo/cauldron"
+	"github.com/mdelapenya/cauldrongo/project"
 )
+
+var testProject = project.Project{ID: 1, Name: "Test Project"}
 
 type testWriter struct {
 	data []byte
@@ -27,7 +30,7 @@ func TestConsoleFormatter(t *testing.T) {
 			name:      "activity",
 			printable: &cauldron.Activity{CommitsActivityOverview: 15},
 			expected: `+-------------------------------------+-------+
-|               METRIC                | VALUE |
+|        METRIC (TEST PROJECT)        | VALUE |
 +-------------------------------------+-------+
 | Commits Activity Overview           |    15 |
 | Lines Commit Activity Overview      |       |
@@ -46,7 +49,7 @@ func TestConsoleFormatter(t *testing.T) {
 			name:      "community",
 			printable: &cauldron.Community{ActivePeopleGitCommunityOverview: 87},
 			expected: `+------------------------------------------+-------+
-|                  METRIC                  | VALUE |
+|          METRIC (TEST PROJECT)           | VALUE |
 +------------------------------------------+-------+
 | Active People Git Community Overview     |    87 |
 | Active People Issues Community Overview  |     0 |
@@ -62,7 +65,7 @@ func TestConsoleFormatter(t *testing.T) {
 			name:      "overview",
 			printable: &cauldron.Overview{CommitsOverview: 1587},
 			expected: `+-------------------------------------------------+-------+
-|                     METRIC                      | VALUE |
+|              METRIC (TEST PROJECT)              | VALUE |
 +-------------------------------------------------+-------+
 | Commits Overview                                |  1587 |
 | Issues Overview                                 |     0 |
@@ -102,7 +105,7 @@ func TestConsoleFormatter(t *testing.T) {
 			name:      "performance",
 			printable: &cauldron.Performance{IssuesTimeOpenAveragePerformanceOverview: 272.41},
 			expected: `+------------------------------------------------+--------+
-|                     METRIC                     | VALUE  |
+|             METRIC (TEST PROJECT)              | VALUE  |
 +------------------------------------------------+--------+
 | Issues Time Open Average Performance Overview  | 272.41 |
 | Issues Time Open Median Performance Overview   |   0.00 |
@@ -121,7 +124,7 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			consoleFormatter := cauldron.NewConsoleFormatter("2021-01-01", "2021-12-31", tt.writer)
+			consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", tt.writer)
 
 			err := consoleFormatter.Format(tt.printable)
 			if err != nil {
@@ -140,7 +143,7 @@ func TestConsoleFormatter(t *testing.T) {
 func TestConsoleFormatterHeader(t *testing.T) {
 	w := &testWriter{}
 
-	consoleFormatter := cauldron.NewConsoleFormatter("2021-01-01", "2021-12-31", w)
+	consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", w)
 
 	err := consoleFormatter.FormatHeader()
 	if err != nil {
@@ -149,7 +152,8 @@ func TestConsoleFormatterHeader(t *testing.T) {
 
 	formatted := string(w.data)
 
-	expected := `From: 2021-01-01
+	expected := `Project: Test Project (1)
+From: 2021-01-01
 To: 2021-12-31
 `
 
@@ -161,7 +165,7 @@ To: 2021-12-31
 func TestJSONFormatter(t *testing.T) {
 	w := &testWriter{}
 	// using tab as indent
-	jsonFormatter := cauldron.NewJSONFormatter("2021-01-01", "2021-12-31", "	", w)
+	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "	", w)
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
@@ -204,7 +208,7 @@ func TestJSONFormatterHeader(t *testing.T) {
 	w := &testWriter{}
 
 	// using empty indent to verify the default indent of 2 spaces
-	jsonFormatter := cauldron.NewJSONFormatter("2021-01-01", "2021-12-31", "", w)
+	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "", w)
 
 	err := jsonFormatter.FormatHeader()
 	if err != nil {
@@ -214,6 +218,10 @@ func TestJSONFormatterHeader(t *testing.T) {
 	formatted := string(w.data)
 
 	expected := `{
+  "project": {
+    "id": 1,
+    "name": "Test Project"
+  },
   "from": "2021-01-01",
   "to": "2021-12-31"
 }
