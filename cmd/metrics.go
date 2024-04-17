@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -61,13 +62,20 @@ var cmdMetrics = &cobra.Command{
 }
 
 func metricsRun(projects []project.Project, from string, to string, tab string) error {
-	for _, p := range projects {
+	writers := make([]io.Writer, len(projects))
+
+	for index, p := range projects {
+		// define a buffer to write the project metrics
+		projectWriter := &strings.Builder{}
+
+		writers[index] = projectWriter
+
 		var formatter cauldron.Formatter
 		switch format {
 		case "json":
-			formatter = cauldron.NewJSONFormatter(p, from, to, "  ", os.Stdout)
+			formatter = cauldron.NewJSONFormatter(p, from, to, "  ", projectWriter)
 		default:
-			formatter = cauldron.NewConsoleFormatter(p, from, to, os.Stdout)
+			formatter = cauldron.NewConsoleFormatter(p, from, to, projectWriter)
 		}
 
 		cauldronURL := cauldron.NewURL(p.ID, from, to, tab)
@@ -138,6 +146,8 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 				return fmt.Errorf("error formatting metrics: %w", err)
 			}
 		}
+
+		fmt.Fprintln(os.Stdout, projectWriter.String())
 	}
 
 	return nil
