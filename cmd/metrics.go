@@ -46,6 +46,8 @@ var cmdMetrics = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		projectIDs := []int{projectID}
 		if len(projects) > 0 {
+			fmt.Printf("Ignoring project ID %d, as the configuration file contains projects.\n", projectID)
+			fmt.Printf("%+v\n", projects)
 			// if the configuration file contains projects, we will ignore the projectID flag
 			projectIDs = []int{}
 			for _, p := range projects {
