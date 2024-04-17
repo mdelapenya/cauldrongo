@@ -80,10 +80,10 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 		urls := []url.URL{cauldronURL}
 		if tab == "" {
 			urls = make([]url.URL, 0, 4)
-			urls = append(urls, cauldron.NewURL(projectID, from, to, "activity-overview"))
-			urls = append(urls, cauldron.NewURL(projectID, from, to, "community-overview"))
-			urls = append(urls, cauldron.NewURL(projectID, from, to, "overview"))
-			urls = append(urls, cauldron.NewURL(projectID, from, to, "performance-overview"))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "activity-overview"))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "community-overview"))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "overview"))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "performance-overview"))
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
