@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/olekukonko/tablewriter"
 )
 
 type Formatter interface {
@@ -13,8 +15,18 @@ type Formatter interface {
 type ConsoleFormatter struct{}
 
 func (c *ConsoleFormatter) Format(w io.Writer, p Processor) error {
-	_, err := w.Write([]byte(fmt.Sprintf("%+v", p)))
-	return err
+	table := tablewriter.NewWriter(w)
+
+	table.SetHeader(p.Headers())
+	table.SetAutoWrapText(false)
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
+
+	for _, v := range p.Data() {
+		table.Append(v)
+	}
+
+	table.Render()
+	return nil
 }
 
 type JSONFormatter struct {

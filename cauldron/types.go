@@ -2,8 +2,14 @@ package cauldron
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 )
+
+var headers = []string{
+	"Metric",
+	"Value",
+}
 
 /*
 	{
@@ -28,6 +34,24 @@ type Activity struct {
 	ReviewsCreatedActivityOverview  int    `json:"reviews_created_activity_overview"`
 	ReviewsClosedActivityOverview   int    `json:"reviews_closed_activity_overview"`
 	ReviewsOpenActivityOverview     int    `json:"reviews_open_activity_overview"`
+}
+
+func (a *Activity) Data() [][]string {
+	return [][]string{
+		{"Commits Activity Overview", fmt.Sprintf("%d", a.CommitsActivityOverview)},
+		{"Lines Commit Activity Overview", a.LinesCommitActivityOverview},
+		{"Lines Commit File Activity Overview", a.LinesCommitFileActivityOverview},
+		{"Issues Created Activity Overview", fmt.Sprintf("%d", a.IssuesCreatedActivityOverview)},
+		{"Issues Closed Activity Overview", fmt.Sprintf("%d", a.IssuesClosedActivityOverview)},
+		{"Issues Open Activity Overview", fmt.Sprintf("%d", a.IssuesOpenActivityOverview)},
+		{"Reviews Created Activity Overview", fmt.Sprintf("%d", a.ReviewsCreatedActivityOverview)},
+		{"Reviews Closed Activity Overview", fmt.Sprintf("%d", a.ReviewsClosedActivityOverview)},
+		{"Reviews Open Activity Overview", fmt.Sprintf("%d", a.ReviewsOpenActivityOverview)},
+	}
+}
+
+func (a *Activity) Headers() []string {
+	return headers
 }
 
 func (a *Activity) Process(r io.Reader) error {
@@ -56,6 +80,21 @@ type Community struct {
 	OnboardingsGitCommunityOverview      int `json:"onboardings_git_community_overview"`
 	OnboardingsIssuesCommunityOverview   int `json:"onboardings_issues_community_overview"`
 	OnboardingsPatchesCommunityOverview  int `json:"onboardings_patches_community_overview"`
+}
+
+func (c *Community) Data() [][]string {
+	return [][]string{
+		{"Active People Git Community Overview", fmt.Sprintf("%d", c.ActivePeopleGitCommunityOverview)},
+		{"Active People Issues Community Overview", fmt.Sprintf("%d", c.ActivePeopleIssuesCommunityOverview)},
+		{"Active People Patches Community Overview", fmt.Sprintf("%d", c.ActivePeoplePatchesCommunityOverview)},
+		{"Onboardings Git Community Overview", fmt.Sprintf("%d", c.OnboardingsGitCommunityOverview)},
+		{"Onboardings Issues Community Overview", fmt.Sprintf("%d", c.OnboardingsIssuesCommunityOverview)},
+		{"Onboardings Patches Community Overview", fmt.Sprintf("%d", c.OnboardingsPatchesCommunityOverview)},
+	}
+}
+
+func (c *Community) Headers() []string {
+	return headers
 }
 
 func (c *Community) Process(r io.Reader) error {
@@ -136,6 +175,45 @@ type Overview struct {
 	ReviewsMedianTimeToCloseYoyOverview      float64 `json:"reviews_median_time_to_close_yoy_overview"`
 }
 
+func (o *Overview) Data() [][]string {
+	return [][]string{
+		{"Commits Overview", fmt.Sprintf("%d", o.CommitsOverview)},
+		{"Issues Overview", fmt.Sprintf("%d", o.IssuesOverview)},
+		{"Reviews Overview", fmt.Sprintf("%d", o.ReviewsOverview)},
+		{"Questions Overview", o.QuestionsOverview},
+		{"Commits Last Year Overview", fmt.Sprintf("%d", o.CommitsLastYearOverview)},
+		{"Issues Last Year Overview", fmt.Sprintf("%d", o.IssuesLastYearOverview)},
+		{"Reviews Last Year Overview", fmt.Sprintf("%d", o.ReviewsLastYearOverview)},
+		{"Questions Last Year Overview", o.QuestionsLastYearOverview},
+		{"Commits YoY Overview", fmt.Sprintf("%.2f", o.CommitsYoyOverview)},
+		{"Issues YoY Overview", fmt.Sprintf("%.2f", o.IssuesYoyOverview)},
+		{"Reviews YoY Overview", fmt.Sprintf("%.2f", o.ReviewsYoyOverview)},
+		{"Questions YoY Overview", fmt.Sprintf("%d", o.QuestionsYoyOverview)},
+		{"Commit Authors Overview", fmt.Sprintf("%d", o.CommitAuthorsOverview)},
+		{"Issue Submitters Overview", fmt.Sprintf("%d", o.IssueSubmittersOverview)},
+		{"Review Submitters Overview", fmt.Sprintf("%d", o.ReviewSubmittersOverview)},
+		{"Question Authors Overview", o.QuestionAuthorsOverview},
+		{"Commit Authors Last Year Overview", fmt.Sprintf("%d", o.CommitAuthorsLastYearOverview)},
+		{"Issue Submitters Last Year Overview", fmt.Sprintf("%d", o.IssueSubmittersLastYearOverview)},
+		{"Review Submitters Last Year Overview", fmt.Sprintf("%d", o.ReviewSubmittersLastYearOverview)},
+		{"Question Authors Last Year Overview", o.QuestionAuthorsLastYearOverview},
+		{"Commit Authors YoY Overview", fmt.Sprintf("%.2f", o.CommitAuthorsYoyOverview)},
+		{"Issue Submitters YoY Overview", fmt.Sprintf("%.2f", o.IssueSubmittersYoyOverview)},
+		{"Review Submitters YoY Overview", fmt.Sprintf("%.2f", o.ReviewSubmittersYoyOverview)},
+		{"Question Authors YoY Overview", fmt.Sprintf("%d", o.QuestionAuthorsYoyOverview)},
+		{"Issues Median Time To Close Overview", fmt.Sprintf("%.2f", o.IssuesMedianTimeToCloseOverview)},
+		{"Reviews Median Time To Close Overview", fmt.Sprintf("%.2f", o.ReviewsMedianTimeToCloseOverview)},
+		{"Issues Median Time To Close Last Year Overview", fmt.Sprintf("%.2f", o.IssuesMedianTimeToCloseLastYearOverview)},
+		{"Reviews Median Time To Close Last Year Overview", fmt.Sprintf("%.2f", o.ReviewsMedianTimeToCloseLastYearOverview)},
+		{"Issues Median Time To Close YoY Overview", fmt.Sprintf("%.2f", o.IssuesMedianTimeToCloseYoyOverview)},
+		{"Reviews Median Time To Close YoY Overview", fmt.Sprintf("%.2f", o.ReviewsMedianTimeToCloseYoyOverview)},
+	}
+}
+
+func (o *Overview) Headers() []string {
+	return headers
+}
+
 func (o *Overview) Process(r io.Reader) error {
 	bs, err := io.ReadAll(r)
 	if err != nil {
@@ -162,6 +240,21 @@ type Performance struct {
 	ReviewsTimeOpenAveragePerformanceOverview float64 `json:"reviews_time_open_average_performance_overview"`
 	ReviewsTimeOpenMedianPerformanceOverview  float64 `json:"reviews_time_open_median_performance_overview"`
 	OpenReviewsPerformanceOverview            int     `json:"open_reviews_performance_overview"`
+}
+
+func (p *Performance) Data() [][]string {
+	return [][]string{
+		{"Issues Time Open Average Performance Overview", fmt.Sprintf("%.2f", p.IssuesTimeOpenAveragePerformanceOverview)},
+		{"Issues Time Open Median Performance Overview", fmt.Sprintf("%.2f", p.IssuesTimeOpenMedianPerformanceOverview)},
+		{"Open Issues Performance Overview", fmt.Sprintf("%d", p.OpenIssuesPerformanceOverview)},
+		{"Reviews Time Open Average Performance Overview", fmt.Sprintf("%.2f", p.ReviewsTimeOpenAveragePerformanceOverview)},
+		{"Reviews Time Open Median Performance Overview", fmt.Sprintf("%.2f", p.ReviewsTimeOpenMedianPerformanceOverview)},
+		{"Open Reviews Performance Overview", fmt.Sprintf("%d", p.OpenReviewsPerformanceOverview)},
+	}
+}
+
+func (p *Performance) Headers() []string {
+	return headers
 }
 
 func (p *Performance) Process(r io.Reader) error {
