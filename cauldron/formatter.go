@@ -9,12 +9,12 @@ import (
 )
 
 type Formatter interface {
-	Format(io.Writer, Processor) error
+	Format(io.Writer, Printable) error
 }
 
 type ConsoleFormatter struct{}
 
-func (c *ConsoleFormatter) Format(w io.Writer, p Processor) error {
+func (c *ConsoleFormatter) Format(w io.Writer, p Printable) error {
 	table := tablewriter.NewWriter(w)
 
 	table.SetHeader(p.Headers())
@@ -33,7 +33,7 @@ type JSONFormatter struct {
 	Indent string
 }
 
-func (j *JSONFormatter) Format(w io.Writer, p Processor) error {
+func (j *JSONFormatter) Format(w io.Writer, p Printable) error {
 	if j.Indent == "" {
 		// default is 2 spaces
 		j.Indent = "  "

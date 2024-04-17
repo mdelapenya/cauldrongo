@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -94,26 +95,31 @@ var cmdMetrics = &cobra.Command{
 			reader := <-responses
 			defer reader.Close()
 
-			var processor cauldron.Processor
+			var printable cauldron.Printable
 			u := urls[i]
 			switch u.Query().Get("tab") {
 			case "activity-overview":
-				processor = &cauldron.Activity{}
+				printable = &cauldron.Activity{}
 			case "community-overview":
-				processor = &cauldron.Community{}
+				printable = &cauldron.Community{}
 			case "performance-overview":
-				processor = &cauldron.Performance{}
+				printable = &cauldron.Performance{}
 			default:
-				processor = &cauldron.Overview{}
+				printable = &cauldron.Overview{}
 			}
 
-			if err := processor.Process(reader); err != nil {
-				fmt.Printf("Error processing metrics: %v\n", err)
+			bs, err := io.ReadAll(reader)
+			if err != nil {
+				fmt.Printf("Error reading metrics: %v\n", err)
 				os.Exit(1)
 			}
 
-			err := formatter.Format(os.Stdout, processor)
-			if err != nil {
+			if err := json.Unmarshal(bs, printable); err != nil {
+				fmt.Printf("Error unmarshalling metrics: %v\n", err)
+				os.Exit(1)
+			}
+
+			if err := formatter.Format(os.Stdout, printable); err != nil {
 				fmt.Printf("Error formatting metrics: %v\n", err)
 				os.Exit(1)
 			}

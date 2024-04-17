@@ -21,13 +21,13 @@ func TestConsoleFormatter(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		processor cauldron.Processor
+		printable cauldron.Printable
 		writer    *testWriter
 		expected  string
 	}{
 		{
 			name:      "activity",
-			processor: &cauldron.Activity{CommitsActivityOverview: 15},
+			printable: &cauldron.Activity{CommitsActivityOverview: 15},
 			expected: `+-------------------------------------+-------+
 |               METRIC                | VALUE |
 +-------------------------------------+-------+
@@ -46,7 +46,7 @@ func TestConsoleFormatter(t *testing.T) {
 		},
 		{
 			name:      "community",
-			processor: &cauldron.Community{ActivePeopleGitCommunityOverview: 87},
+			printable: &cauldron.Community{ActivePeopleGitCommunityOverview: 87},
 			expected: `+------------------------------------------+-------+
 |                  METRIC                  | VALUE |
 +------------------------------------------+-------+
@@ -62,7 +62,7 @@ func TestConsoleFormatter(t *testing.T) {
 		},
 		{
 			name:      "overview",
-			processor: &cauldron.Overview{CommitsOverview: 1587},
+			printable: &cauldron.Overview{CommitsOverview: 1587},
 			expected: `+-------------------------------------------------+-------+
 |                     METRIC                      | VALUE |
 +-------------------------------------------------+-------+
@@ -102,7 +102,7 @@ func TestConsoleFormatter(t *testing.T) {
 		},
 		{
 			name:      "performance",
-			processor: &cauldron.Performance{IssuesTimeOpenAveragePerformanceOverview: 272.41},
+			printable: &cauldron.Performance{IssuesTimeOpenAveragePerformanceOverview: 272.41},
 			expected: `+------------------------------------------------+--------+
 |                     METRIC                     | VALUE  |
 +------------------------------------------------+--------+
@@ -123,7 +123,7 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			err := consoleFormatter.Format(tt.writer, tt.processor)
+			err := consoleFormatter.Format(tt.writer, tt.printable)
 			if err != nil {
 				innerT.Fatalf("error formatting: %v", err)
 			}

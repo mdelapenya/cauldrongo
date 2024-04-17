@@ -2,7 +2,9 @@ package cauldron_test
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"path/filepath"
 	"testing"
@@ -21,15 +23,15 @@ func TestMockHTTPRequests(t *testing.T) {
 	tests := []struct {
 		name       string
 		tab        string
-		processor  cauldron.Processor
-		assertFunc func(t *testing.T, processor cauldron.Processor)
+		printable  cauldron.Printable
+		assertFunc func(t *testing.T, printable cauldron.Printable)
 	}{
 		{
 			name:      "activity",
 			tab:       "activity-overview",
-			processor: &cauldron.Activity{},
-			assertFunc: func(t *testing.T, processor cauldron.Processor) {
-				a := processor.(*cauldron.Activity)
+			printable: &cauldron.Activity{},
+			assertFunc: func(t *testing.T, printable cauldron.Printable) {
+				a := printable.(*cauldron.Activity)
 
 				if a.CommitsActivityOverview != 15 {
 					t.Fatalf("expected CommitsActivityOverview=15 but got %d", a.CommitsActivityOverview)
@@ -39,9 +41,9 @@ func TestMockHTTPRequests(t *testing.T) {
 		{
 			name:      "community",
 			tab:       "community-overview",
-			processor: &cauldron.Community{},
-			assertFunc: func(t *testing.T, processor cauldron.Processor) {
-				c := processor.(*cauldron.Community)
+			printable: &cauldron.Community{},
+			assertFunc: func(t *testing.T, printable cauldron.Printable) {
+				c := printable.(*cauldron.Community)
 
 				if c.ActivePeopleGitCommunityOverview != 8 {
 					t.Fatalf("expected ActivePeopleGitCommunityOverview=8 but got %d", c.ActivePeopleGitCommunityOverview)
@@ -51,9 +53,9 @@ func TestMockHTTPRequests(t *testing.T) {
 		{
 			name:      "overview",
 			tab:       "overview",
-			processor: &cauldron.Overview{},
-			assertFunc: func(t *testing.T, processor cauldron.Processor) {
-				o := processor.(*cauldron.Overview)
+			printable: &cauldron.Overview{},
+			assertFunc: func(t *testing.T, printable cauldron.Printable) {
+				o := printable.(*cauldron.Overview)
 
 				if o.CommitsOverview != 1581 {
 					t.Fatalf("expected CommitsOverview=1581 but got %d", o.CommitsOverview)
@@ -63,9 +65,9 @@ func TestMockHTTPRequests(t *testing.T) {
 		{
 			name:      "performance",
 			tab:       "performance-overview",
-			processor: &cauldron.Performance{},
-			assertFunc: func(t *testing.T, processor cauldron.Processor) {
-				p := processor.(*cauldron.Performance)
+			printable: &cauldron.Performance{},
+			assertFunc: func(t *testing.T, printable cauldron.Printable) {
+				p := printable.(*cauldron.Performance)
 
 				if p.IssuesTimeOpenAveragePerformanceOverview != 272.41 {
 					t.Fatalf("expected IssuesTimeOpenAveragePerformanceOverview=272.41 but got %f", p.IssuesTimeOpenAveragePerformanceOverview)
@@ -115,12 +117,16 @@ func TestMockHTTPRequests(t *testing.T) {
 				innerT.Fatalf("expected HTTP-200 but got %d", statusCode)
 			}
 
-			err = tt.processor.Process(body)
+			bs, err := io.ReadAll(body)
 			if err != nil {
-				t.Fatal(err)
+				innerT.Fatalf("Failed to read the response %v", err)
 			}
 
-			tt.assertFunc(t, tt.processor)
+			if err := json.Unmarshal(bs, tt.printable); err != nil {
+				innerT.Fatalf("Failed to unmarshal the response %v", err)
+			}
+
+			tt.assertFunc(t, tt.printable)
 		})
 	}
 }

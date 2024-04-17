@@ -1,9 +1,7 @@
 package cauldron
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 )
 
 var headers = []string{
@@ -54,15 +52,6 @@ func (a *Activity) Headers() []string {
 	return headers
 }
 
-func (a *Activity) Process(r io.Reader) error {
-	bs, err := io.ReadAll(r)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(bs, a)
-}
-
 /*
 	{
 		"active_people_git_community_overview": 8,
@@ -95,15 +84,6 @@ func (c *Community) Data() [][]string {
 
 func (c *Community) Headers() []string {
 	return headers
-}
-
-func (c *Community) Process(r io.Reader) error {
-	bs, err := io.ReadAll(r)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(bs, c)
 }
 
 /*
@@ -214,15 +194,6 @@ func (o *Overview) Headers() []string {
 	return headers
 }
 
-func (o *Overview) Process(r io.Reader) error {
-	bs, err := io.ReadAll(r)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(bs, o)
-}
-
 /*
 	{
 	    "issues_time_open_average_performance_overview": 272.41,
@@ -255,13 +226,4 @@ func (p *Performance) Data() [][]string {
 
 func (p *Performance) Headers() []string {
 	return headers
-}
-
-func (p *Performance) Process(r io.Reader) error {
-	bs, err := io.ReadAll(r)
-	if err != nil {
-		return err
-	}
-
-	return json.Unmarshal(bs, p)
 }
