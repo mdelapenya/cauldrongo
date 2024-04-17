@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/mdelapenya/cauldrongo/project"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -14,6 +15,7 @@ const (
 )
 
 var cfgFile string
+var projects []project.Project
 
 var rootCmd = &cobra.Command{
 	Use:   "cauldrongo",
@@ -21,13 +23,7 @@ var rootCmd = &cobra.Command{
 	Long: `A Fast and Flexible Go client for the Cauldron APIs built with
 				  love by mdelapenya and friends in Go.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		bs, err := os.ReadFile(cfgFile)
-		if err != nil {
-			fmt.Println("Can't read config:", err)
-			os.Exit(1)
-		}
-
-		fmt.Println(string(bs))
+		//
 	},
 }
 
@@ -56,13 +52,19 @@ func initConfig() {
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".cauldrongo.yml" (without extension).
+		// Search config in home directory with name ".cauldrongo.yml"
 		viper.AddConfigPath(home)
 		viper.SetConfigName(".cauldrongo.yml")
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		fmt.Println("Can't read config:", err)
+		os.Exit(1)
+	}
+
+	err := viper.UnmarshalKey("projects", &projects)
+	if err != nil {
+		fmt.Println("Can't unmarshal projects:", err)
 		os.Exit(1)
 	}
 }
