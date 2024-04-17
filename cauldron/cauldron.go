@@ -23,12 +23,12 @@ func NewURL(projectID int, from, to, tab string) url.URL {
 	}
 }
 
-func HttpRequest(url *url.URL) (io.ReadCloser, error) {
+func HttpRequest(url url.URL) (io.ReadCloser, int, error) {
 	httpCli := http.Client{}
 
 	req, err := http.NewRequest("GET", url.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("error creating HTTP request: %v", err)
+		return nil, http.StatusInternalServerError, fmt.Errorf("error creating HTTP request: %v", err)
 	}
 
 	req.Header.Add("Authority", "cauldron.io")
@@ -38,13 +38,9 @@ func HttpRequest(url *url.URL) (io.ReadCloser, error) {
 
 	resp, err := httpCli.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("error making HTTP request: %v", err)
+		return nil, http.StatusInternalServerError, fmt.Errorf("error making HTTP request: %v", err)
 	}
 	// we are intentionally not closing the body here, as it will be read by the caller
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-
-	return resp.Body, nil
+	return resp.Body, resp.StatusCode, nil
 }

@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"time"
@@ -67,10 +68,15 @@ var cmdMetrics = &cobra.Command{
 		for _, u := range urls {
 			u := u
 			errorGroup.Go(func() error {
-				reader, err := cauldron.HttpRequest(&u)
+				reader, code, err := cauldron.HttpRequest(u)
 				if err != nil {
 					fmt.Printf("Error fetching metrics: %v. URL: %s\n", err, u.String())
 					return err
+				}
+
+				if code != http.StatusOK {
+					fmt.Printf("Error fetching metrics: HTTP status code %d. URL: %s\n", code, u.String())
+					return fmt.Errorf("HTTP status code %d", code)
 				}
 
 				responses <- reader

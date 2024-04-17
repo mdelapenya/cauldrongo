@@ -3,8 +3,8 @@ package cauldron_test
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/mdelapenya/cauldrongo/cauldron"
@@ -85,25 +85,37 @@ func TestMockHTTPRequests(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	host, err := container.Host(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	port, err := container.MappedPort(ctx, "8080")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	baseURL := fmt.Sprintf("%s:%s", host, port.Port())
+
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
 			url := cauldron.NewURL(2296, "2024-04-01", "2024-04-16", tt.tab)
+			url.Scheme = "http"
+			url.Host = baseURL
 
-			mockURL := fmt.Sprintf("%s?%s", url.Path, url.RawQuery)
-
-			statusCode, out, err := wiremock.SendHttpGet(container, mockURL, nil)
+			body, statusCode, err := cauldron.HttpRequest(url)
 			if err != nil {
 				innerT.Fatal(err, "Failed to get a response")
 			}
 
-			if statusCode != 200 {
+			if statusCode != http.StatusOK {
 				innerT.Fatalf("expected HTTP-200 but got %d", statusCode)
 			}
 
-			err = tt.processor.Process(strings.NewReader(out))
+			err = tt.processor.Process(body)
 			if err != nil {
 				t.Fatal(err)
 			}
