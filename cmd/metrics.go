@@ -44,6 +44,24 @@ var cmdMetrics = &cobra.Command{
 	Long: `Fetch metrics for a given project. It will return the metrics for the
 				  project in the requested format.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		projectIDs := []int{projectID}
+		if len(projects) > 0 {
+			// if the configuration file contains projects, we will ignore the projectID flag
+			projectIDs = []int{}
+			for _, p := range projects {
+				projectIDs = append(projectIDs, p.ID)
+			}
+		}
+
+		if err := metricsRun(projectIDs, from, to, tab); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+	},
+}
+
+func metricsRun(projectIDs []int, from string, to string, tab string) error {
+	for _, projectID := range projectIDs {
 		overviewURL := cauldron.NewURL(projectID, from, to, tab)
 		urls := []url.URL{overviewURL}
 		if tab == "" {
@@ -71,13 +89,11 @@ var cmdMetrics = &cobra.Command{
 			errorGroup.Go(func() error {
 				reader, code, err := cauldron.HttpRequest(u)
 				if err != nil {
-					fmt.Printf("Error fetching metrics: %v. URL: %s\n", err, u.String())
-					return err
+					return fmt.Errorf("error fetching metrics: %w. URL: %s", err, u.String())
 				}
 
 				if code != http.StatusOK {
-					fmt.Printf("Error fetching metrics: HTTP status code %d. URL: %s\n", code, u.String())
-					return fmt.Errorf("HTTP status code %d", code)
+					return fmt.Errorf("error fetching metrics: HTTP status code %d. URL: %s", code, u.String())
 				}
 
 				responses <- reader
@@ -86,8 +102,7 @@ var cmdMetrics = &cobra.Command{
 		}
 
 		if err := errorGroup.Wait(); err != nil {
-			fmt.Println("Error fetching metrics:", err)
-			os.Exit(1)
+			return err
 		}
 
 		// process all responses
@@ -110,19 +125,18 @@ var cmdMetrics = &cobra.Command{
 
 			bs, err := io.ReadAll(reader)
 			if err != nil {
-				fmt.Printf("Error reading metrics: %v\n", err)
-				os.Exit(1)
+				return fmt.Errorf("error reading metrics: %w", err)
 			}
 
 			if err := json.Unmarshal(bs, printable); err != nil {
-				fmt.Printf("Error unmarshalling metrics: %v\n", err)
-				os.Exit(1)
+				return fmt.Errorf("error unmarshalling metrics: %w", err)
 			}
 
 			if err := formatter.Format(os.Stdout, printable); err != nil {
-				fmt.Printf("Error formatting metrics: %v\n", err)
-				os.Exit(1)
+				return fmt.Errorf("error formatting metrics: %w", err)
 			}
 		}
-	},
+	}
+
+	return nil
 }
