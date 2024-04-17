@@ -15,7 +15,7 @@ import (
 )
 
 func TestMockHTTPRequests(t *testing.T) {
-	absPath, err := filepath.Abs("testdata")
+	absPath, err := filepath.Abs(filepath.Join("..", "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}
