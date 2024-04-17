@@ -8,4 +8,4 @@ projects:
 - id: 7266
   name: testcontainers-node
 - id: 7607
-  name: testcontainers-node
+  name: testcontainers-ruby

@@ -53,6 +53,8 @@ projects:
   name: testcontainers-ruby
 ```
 
+There is a sample configuration file in the `root` directory of the project, named `.sample-cauldrongo.yaml`.
+
 ### Examples
 
 ```sh
