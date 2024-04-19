@@ -116,7 +116,8 @@ archives:
 brews:
   - repository:
       owner: mdelapenya
-      name: cauldrongo-homebrew-tap
+      name: homebrew-cauldrongo-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     directory: Formula
     goarm: "7"
     description: Fetch Cauldron metrics
