@@ -4,7 +4,7 @@ This is a simple Go program that fetches the OSS metrics from the Cauldron API.
 
 ## Install
 
-- **MacOS:**You can install the CLI using the following command:
+- **MacOS**: You can install the CLI using the following command:
 
 ```sh
 brew install mdelapenya/cauldrongo-tap/cauldrongo
