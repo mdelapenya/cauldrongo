@@ -41,7 +41,7 @@ It's **important** to note that the repositories, and their datasources, must be
 
 The CLI has one subcommand: `metrics`. It has the following flags:
 
-- `--project | -p`: the project ID. Required.
+- `--project-id | -p`: the project ID. Required.
 - `--from | -f`: the start date of the metrics, in the format `YYYY-MM-DD`. Default is one year ago.
 - `--to | -t`: the end date of the metrics, in the format `YYYY-MM-DD`. Default is today.
 - `--tab | -T`: the tab of the metrics. Default is `overview`.
@@ -69,11 +69,11 @@ There is a sample configuration file in the `root` directory of the project, nam
 
 ```sh
 # Fetch the metrics for the project 1, from one year ago to today, using the overview tab, in the console format.
-cauldrongo metrics --project 1
+cauldrongo metrics --project-id 1
 # Fetch the metrics for the project 1, from one year ago to today, using the performance overview tab, in the JSON format.
-cauldrongo metrics --project 1 --tab=performance-overview --format=json
+cauldrongo metrics --project-id 1 --tab=performance-overview --format=json
 # Fetch the metrics for all the projects in the configuration file located in the ${MY_CAULDRON_FILE} path, from one year ago to today, using the performance overview tab, in the JSON format.
-cauldrongo metrics --config=${MY_CAULDRON_FILE} --project 1 --tab=performance-overview --format=json
+cauldrongo metrics --config=${MY_CAULDRON_FILE} --project-id 1 --tab=performance-overview --format=json
 ```
 
 ## Not implemented (yet)
