@@ -76,50 +76,33 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 			formatter = cauldron.NewConsoleFormatter(p, from, to, projectWriter)
 		}
 
-		cauldronURL := cauldron.NewURL(p.ID, from, to, tab)
-		urls := []url.URL{cauldronURL}
+		var urls []url.URL
 		if tab == "" {
 			urls = make([]url.URL, 0, 4)
 			urls = append(urls, cauldron.NewURL(p.ID, from, to, "activity-overview"))
 			urls = append(urls, cauldron.NewURL(p.ID, from, to, "community-overview"))
 			urls = append(urls, cauldron.NewURL(p.ID, from, to, "overview"))
 			urls = append(urls, cauldron.NewURL(p.ID, from, to, "performance-overview"))
+		} else {
+			urls = make([]url.URL, 0, 1)
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, tab))
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
 		// and printing them
 
-		responses := make(chan io.ReadCloser, len(urls))
+		type responsePair struct {
+			reader    io.ReadCloser
+			printable cauldron.Printable
+		}
+
+		responses := make(chan responsePair, len(urls))
 
 		errorGroup := errgroup.Group{}
 		for _, u := range urls {
 			u := u
-			errorGroup.Go(func() error {
-				reader, code, err := cauldron.HttpRequest(u)
-				if err != nil {
-					return fmt.Errorf("error fetching metrics: %w. URL: %s", err, u.String())
-				}
-
-				if code != http.StatusOK {
-					return fmt.Errorf("error fetching metrics: HTTP status code %d. URL: %s", code, u.String())
-				}
-
-				responses <- reader
-				return nil
-			})
-		}
-
-		if err := errorGroup.Wait(); err != nil {
-			return err
-		}
-
-		// process all responses
-		for i := 0; i < len(urls); i++ {
-			reader := <-responses
-			defer reader.Close()
-
 			var printable cauldron.Printable
-			u := urls[i]
+
 			switch u.Query().Get("tab") {
 			case "activity-overview":
 				printable = &cauldron.Activity{}
@@ -130,6 +113,34 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 			default:
 				printable = &cauldron.Overview{}
 			}
+
+			errorGroup.Go(func() error {
+				reader, code, err := cauldron.HttpRequest(u)
+				if err != nil {
+					return fmt.Errorf("error fetching metrics: %w. URL: %s", err, u.String())
+				}
+
+				if code != http.StatusOK {
+					return fmt.Errorf("error fetching metrics: HTTP status code %d. URL: %s", code, u.String())
+				}
+
+				responses <- responsePair{reader, printable}
+				return nil
+			})
+		}
+
+		if err := errorGroup.Wait(); err != nil {
+			return err
+		}
+
+		// process all responses
+		for i := 0; i < len(urls); i++ {
+			resp := <-responses
+
+			reader := resp.reader
+			printable := resp.printable
+
+			defer reader.Close()
 
 			bs, err := io.ReadAll(reader)
 			if err != nil {
