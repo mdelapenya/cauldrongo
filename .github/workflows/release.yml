@@ -20,6 +20,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
 
+      - name: Install tools
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:
