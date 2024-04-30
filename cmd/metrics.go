@@ -48,7 +48,8 @@ var cmdMetrics = &cobra.Command{
 	Long: `Fetch metrics for a given project. It will return the metrics for the
 				  project in the requested format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runProjects := []project.Project{{ID: projectID}}
+		projects := cfg.Projects
+		runProjects := []project.Project{{ID: projectID, RepoURL: repoURLs}}
 		if len(projects) > 0 {
 			// if the configuration file contains projects, we will ignore the projectID flag
 			runProjects = projects
