@@ -146,7 +146,17 @@ func metricsRun(projects []project.Project, from string, to string, tab string, 
 				return fmt.Errorf("error unmarshalling metrics: %w", err)
 			}
 
-			urlTab := urls[i].Query().Get("tab")
+			var urlTab string
+			switch printable.(type) {
+			case *cauldron.Activity:
+				urlTab = "activity-overview"
+			case *cauldron.Community:
+				urlTab = "community-overview"
+			case *cauldron.Performance:
+				urlTab = "performance-overview"
+			default:
+				urlTab = "overview"
+			}
 
 			var formatter cauldron.Formatter
 			switch format {
