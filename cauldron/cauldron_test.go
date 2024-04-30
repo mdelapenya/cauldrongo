@@ -161,9 +161,9 @@ func TestNewURL(t *testing.T) {
 			to:        "2024-04-16",
 			tab:       "activity-overview",
 			repoURLs: []string{
-				"https://github.com/tescontainers/testcontainers-go",
+				"https://github.com/testcontainers/testcontainers-go",
 			},
-			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url=https://github.com/tescontainers/testcontainers-go",
+			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url%5B%5D=https%3A%2F%2Fgithub.com%2Ftestcontainers%2Ftestcontainers-go",
 		},
 		{
 			name:      "with-repo-urls",
@@ -172,10 +172,10 @@ func TestNewURL(t *testing.T) {
 			to:        "2024-04-16",
 			tab:       "activity-overview",
 			repoURLs: []string{
-				"https://github.com/tescontainers/testcontainers-go",
-				"https://github.com/tescontainers/testcontainers-go.git",
+				"https://github.com/testcontainers/testcontainers-go",
+				"https://github.com/testcontainers/testcontainers-go.git",
 			},
-			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url=https://github.com/tescontainers/testcontainers-go&repo_url=https://github.com/tescontainers/testcontainers-go.git",
+			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url%5B%5D=https%3A%2F%2Fgithub.com%2Ftestcontainers%2Ftestcontainers-go&repo_url%5B%5D=https%3A%2F%2Fgithub.com%2Ftestcontainers%2Ftestcontainers-go.git",
 		},
 	}
 

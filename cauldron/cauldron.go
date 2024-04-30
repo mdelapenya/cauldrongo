@@ -17,14 +17,12 @@ const (
 func NewURL(projectID int, from, to, tab string, repoURLs []string) url.URL {
 	rawQuery := fmt.Sprintf(metricsQueryStringFormat, from, to, tab)
 	if len(repoURLs) > 0 {
-		args := []any{from, to, tab}
-		format := metricsQueryStringFormat
+		queryRepos := ""
 		for _, repoURL := range repoURLs {
-			args = append(args, repoURL)
-			format += "&repo_url=%s"
+			queryRepos += "&" + url.QueryEscape("repo_url[]") + "=" + url.QueryEscape(repoURL)
 		}
 
-		rawQuery = fmt.Sprintf(format, args...)
+		rawQuery = rawQuery + queryRepos
 	}
 
 	return url.URL{
