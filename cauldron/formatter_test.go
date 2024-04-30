@@ -7,7 +7,7 @@ import (
 	"github.com/mdelapenya/cauldrongo/project"
 )
 
-var testProject = project.Project{ID: 1, Name: "Test Project"}
+var testProject = project.Project{ID: 1, Name: "Test Project", RepoURL: []string{"http://example.com/repo", "http://example.com/repo.git"}}
 
 type testWriter struct {
 	data []byte
@@ -127,6 +127,7 @@ func TestConsoleFormatter(t *testing.T) {
 			formatted := string(tt.writer.data)
 
 			expected := `Project: Test Project (1)
+Repo URLs: [http://example.com/repo http://example.com/repo.git]
 From: 2021-01-01
 To: 2021-12-31
 `
@@ -159,7 +160,11 @@ func TestJSONFormatter(t *testing.T) {
 	expected := `{
 	"project": {
 		"id": 1,
-		"name": "Test Project"
+		"name": "Test Project",
+		"RepoURL": [
+			"http://example.com/repo",
+			"http://example.com/repo.git"
+		]
 	},
 	"from": "2021-01-01",
 	"to": "2021-12-31",

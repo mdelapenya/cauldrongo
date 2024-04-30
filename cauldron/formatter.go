@@ -31,6 +31,7 @@ type consoleFormatter struct {
 
 func (c *consoleFormatter) Format(p Printable) error {
 	fmt.Fprintf(c.Writer, "Project: %s (%d)\n", c.Project.Name, c.Project.ID)
+	fmt.Fprintf(c.Writer, "Repo URLs: %v\n", c.Project.RepoURL)
 	fmt.Fprintf(c.Writer, "From: %s\n", c.From)
 	fmt.Fprintf(c.Writer, "To: %s\n", c.To)
 
