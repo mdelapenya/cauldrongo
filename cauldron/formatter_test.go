@@ -69,27 +69,21 @@ func TestConsoleFormatter(t *testing.T) {
 | Commits Overview                                |  1587 |
 | Issues Overview                                 |     0 |
 | Reviews Overview                                |     0 |
-| Questions Overview                              |       |
 | Commits Last Year Overview                      |     0 |
 | Issues Last Year Overview                       |     0 |
 | Reviews Last Year Overview                      |     0 |
-| Questions Last Year Overview                    |       |
 | Commits YoY Overview                            |  0.00 |
 | Issues YoY Overview                             |  0.00 |
 | Reviews YoY Overview                            |  0.00 |
-| Questions YoY Overview                          |     0 |
 | Commit Authors Overview                         |     0 |
 | Issue Submitters Overview                       |     0 |
 | Review Submitters Overview                      |     0 |
-| Question Authors Overview                       |       |
 | Commit Authors Last Year Overview               |     0 |
 | Issue Submitters Last Year Overview             |     0 |
 | Review Submitters Last Year Overview            |     0 |
-| Question Authors Last Year Overview             |       |
 | Commit Authors YoY Overview                     |  0.00 |
 | Issue Submitters YoY Overview                   |  0.00 |
 | Review Submitters YoY Overview                  |  0.00 |
-| Question Authors YoY Overview                   |     0 |
 | Issues Median Time To Close Overview            |  0.00 |
 | Reviews Median Time To Close Overview           |  0.00 |
 | Issues Median Time To Close Last Year Overview  |  0.00 |
