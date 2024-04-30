@@ -104,7 +104,11 @@ func TestMockHTTPRequests(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			url := cauldron.NewURL(2296, "2024-04-01", "2024-04-16", tt.tab)
+			// setting repo_urls to an empty slice on purpose,
+			// as the test data does not include any repoURLs
+			repoURLs := []string{}
+
+			url := cauldron.NewURL(2296, "2024-04-01", "2024-04-16", tt.tab, repoURLs)
 			url.Scheme = "http"
 			url.Host = baseURL
 
@@ -127,6 +131,63 @@ func TestMockHTTPRequests(t *testing.T) {
 			}
 
 			tt.assertFunc(t, tt.printable)
+		})
+	}
+}
+
+func TestNewURL(t *testing.T) {
+	testCases := []struct {
+		name      string
+		projectID int
+		from      string
+		to        string
+		tab       string
+		repoURLs  []string
+		expected  string
+	}{
+		{
+			name:      "no-repo-urls",
+			projectID: 2296,
+			from:      "2024-04-01",
+			to:        "2024-04-16",
+			tab:       "activity-overview",
+			repoURLs:  []string{},
+			expected:  "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview",
+		},
+		{
+			name:      "with-repo-url",
+			projectID: 2296,
+			from:      "2024-04-01",
+			to:        "2024-04-16",
+			tab:       "activity-overview",
+			repoURLs: []string{
+				"https://github.com/tescontainers/testcontainers-go",
+			},
+			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url=https://github.com/tescontainers/testcontainers-go",
+		},
+		{
+			name:      "with-repo-urls",
+			projectID: 2296,
+			from:      "2024-04-01",
+			to:        "2024-04-16",
+			tab:       "activity-overview",
+			repoURLs: []string{
+				"https://github.com/tescontainers/testcontainers-go",
+				"https://github.com/tescontainers/testcontainers-go.git",
+			},
+			expected: "https://cauldron.io/project/2296/metrics?from=2024-04-01&to=2024-04-16&tab=activity-overview&repo_url=https://github.com/tescontainers/testcontainers-go&repo_url=https://github.com/tescontainers/testcontainers-go.git",
+		},
+	}
+
+	for _, testCase := range testCases {
+		testCase := testCase
+		t.Run(testCase.name, func(tt *testing.T) {
+			tt.Parallel()
+
+			url := cauldron.NewURL(testCase.projectID, testCase.from, testCase.to, testCase.tab, testCase.repoURLs)
+			if url.String() != testCase.expected {
+				tt.Fatalf("expected %s but got %s", testCase.expected, url.String())
+			}
 		})
 	}
 }
