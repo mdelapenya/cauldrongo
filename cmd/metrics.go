@@ -74,9 +74,9 @@ func metricsRun(projects []project.Project, from string, to string, tab string, 
 		var formatter cauldron.Formatter
 		switch format {
 		case "json":
-			formatter = cauldron.NewJSONFormatter(p, from, to, "  ", projectWriter)
+			formatter = cauldron.NewJSONFormatter(p, from, to, tab, "  ", projectWriter)
 		default:
-			formatter = cauldron.NewConsoleFormatter(p, from, to, projectWriter)
+			formatter = cauldron.NewConsoleFormatter(p, from, to, tab, projectWriter)
 		}
 
 		var urls []url.URL

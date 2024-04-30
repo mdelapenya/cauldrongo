@@ -13,11 +13,12 @@ type Formatter interface {
 	Format(Printable) error
 }
 
-func NewConsoleFormatter(p project.Project, from string, to string, w io.Writer) *consoleFormatter {
+func NewConsoleFormatter(p project.Project, from string, to string, tab string, w io.Writer) *consoleFormatter {
 	return &consoleFormatter{
 		Project: p,
 		From:    from,
 		To:      to,
+		Tab:     tab,
 		Writer:  w,
 	}
 }
@@ -25,6 +26,7 @@ func NewConsoleFormatter(p project.Project, from string, to string, w io.Writer)
 type consoleFormatter struct {
 	From    string
 	To      string
+	Tab     string
 	Writer  io.Writer
 	Project project.Project
 }
@@ -34,6 +36,7 @@ func (c *consoleFormatter) Format(p Printable) error {
 	fmt.Fprintf(c.Writer, "Repo URLs: %v\n", c.Project.RepoURL)
 	fmt.Fprintf(c.Writer, "From: %s\n", c.From)
 	fmt.Fprintf(c.Writer, "To: %s\n", c.To)
+	fmt.Fprintf(c.Writer, "Tab: %s\n", c.Tab)
 
 	table := tablewriter.NewWriter(c.Writer)
 
@@ -54,7 +57,7 @@ func (c *consoleFormatter) Format(p Printable) error {
 	return nil
 }
 
-func NewJSONFormatter(p project.Project, from string, to string, indent string, w io.Writer) *jsonFormatter {
+func NewJSONFormatter(p project.Project, from string, to string, tab string, indent string, w io.Writer) *jsonFormatter {
 	if len(indent) == 0 {
 		indent = "  "
 	}
@@ -63,6 +66,7 @@ func NewJSONFormatter(p project.Project, from string, to string, indent string, 
 		Project: p,
 		From:    from,
 		To:      to,
+		Tab:     tab,
 		Writer:  w,
 		Indent:  indent,
 	}
@@ -72,6 +76,7 @@ type jsonFormatter struct {
 	Indent  string
 	From    string
 	To      string
+	Tab     string
 	Writer  io.Writer
 	Project project.Project
 }
@@ -80,6 +85,7 @@ type JSONResponse struct {
 	Project  project.Project `json:"project"`
 	From     string          `json:"from"`
 	To       string          `json:"to"`
+	Tab      string          `json:"tab"`
 	Response Printable       `json:"response"`
 }
 
@@ -93,6 +99,7 @@ func (j *jsonFormatter) Format(p Printable) error {
 		Project:  j.Project,
 		From:     j.From,
 		To:       j.To,
+		Tab:      j.Tab,
 		Response: p,
 	}
 

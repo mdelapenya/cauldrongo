@@ -117,7 +117,7 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", tt.writer)
+			consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", "activity-overview", tt.writer)
 
 			err := consoleFormatter.Format(tt.printable)
 			if err != nil {
@@ -130,6 +130,7 @@ func TestConsoleFormatter(t *testing.T) {
 Repo URLs: [http://example.com/repo http://example.com/repo.git]
 From: 2021-01-01
 To: 2021-12-31
+Tab: activity-overview
 `
 			expected += tt.expected
 
@@ -143,7 +144,7 @@ To: 2021-12-31
 func TestJSONFormatter(t *testing.T) {
 	w := &testWriter{}
 	// using tab as indent
-	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "	", w)
+	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "activity-overview", "	", w)
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
@@ -168,6 +169,7 @@ func TestJSONFormatter(t *testing.T) {
 	},
 	"from": "2021-01-01",
 	"to": "2021-12-31",
+	"tab": "activity-overview",
 	"response": {
 		"commits_activity_overview": 15,
 		"lines_commit_activity_overview": "",
