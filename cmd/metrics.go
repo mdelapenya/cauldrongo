@@ -22,6 +22,7 @@ var from string
 var to string
 var tab string
 var format string
+var repoURLs []string
 
 func init() {
 	now := time.Now()
@@ -36,6 +37,7 @@ func init() {
 	cmdMetrics.Flags().StringVarP(&to, "to", "t", formattedNow, "The end date to fetch metrics. Default is today.")
 	cmdMetrics.Flags().StringVarP(&tab, "tab", "T", "", "The tab to fetch metrics. Possible values are: overview, activity-overview, community-overview, performance-overview. Default is overview.")
 	cmdMetrics.Flags().StringVarP(&format, "format", "F", "console", "The format to output the metrics. Possible values are: console and json. Default is console.")
+	cmdMetrics.Flags().StringSliceVarP(&repoURLs, "repo-url", "r", []string{}, "The repository URLs to fetch metrics. Default is empty.")
 
 	rootCmd.AddCommand(cmdMetrics)
 }
@@ -46,20 +48,21 @@ var cmdMetrics = &cobra.Command{
 	Long: `Fetch metrics for a given project. It will return the metrics for the
 				  project in the requested format.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		runProjects := []project.Project{{ID: projectID}}
+		projects := cfg.Projects
+		runProjects := []project.Project{{ID: projectID, RepoURL: repoURLs}}
 		if len(projects) > 0 {
 			// if the configuration file contains projects, we will ignore the projectID flag
 			runProjects = projects
 		}
 
-		if err := metricsRun(runProjects, from, to, tab); err != nil {
+		if err := metricsRun(runProjects, from, to, tab, repoURLs); err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 	},
 }
 
-func metricsRun(projects []project.Project, from string, to string, tab string) error {
+func metricsRun(projects []project.Project, from string, to string, tab string, repoURLs []string) error {
 	writers := make([]io.Writer, len(projects))
 
 	for index, p := range projects {
@@ -68,24 +71,16 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 
 		writers[index] = projectWriter
 
-		var formatter cauldron.Formatter
-		switch format {
-		case "json":
-			formatter = cauldron.NewJSONFormatter(p, from, to, "  ", projectWriter)
-		default:
-			formatter = cauldron.NewConsoleFormatter(p, from, to, projectWriter)
-		}
-
 		var urls []url.URL
 		if tab == "" {
 			urls = make([]url.URL, 0, 4)
-			urls = append(urls, cauldron.NewURL(p.ID, from, to, "activity-overview"))
-			urls = append(urls, cauldron.NewURL(p.ID, from, to, "community-overview"))
-			urls = append(urls, cauldron.NewURL(p.ID, from, to, "overview"))
-			urls = append(urls, cauldron.NewURL(p.ID, from, to, "performance-overview"))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "activity-overview", repoURLs))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "community-overview", repoURLs))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "overview", repoURLs))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, "performance-overview", repoURLs))
 		} else {
 			urls = make([]url.URL, 0, 1)
-			urls = append(urls, cauldron.NewURL(p.ID, from, to, tab))
+			urls = append(urls, cauldron.NewURL(p.ID, from, to, tab, repoURLs))
 		}
 
 		// execute all requests concurrently, waiting for the last one to finish, capturing errors
@@ -149,6 +144,16 @@ func metricsRun(projects []project.Project, from string, to string, tab string) 
 
 			if err := json.Unmarshal(bs, printable); err != nil {
 				return fmt.Errorf("error unmarshalling metrics: %w", err)
+			}
+
+			urlTab := urls[i].Query().Get("tab")
+
+			var formatter cauldron.Formatter
+			switch format {
+			case "json":
+				formatter = cauldron.NewJSONFormatter(p, from, to, urlTab, "  ", projectWriter)
+			default:
+				formatter = cauldron.NewConsoleFormatter(p, from, to, urlTab, projectWriter)
 			}
 
 			if err := formatter.Format(printable); err != nil {

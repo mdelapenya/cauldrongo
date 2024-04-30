@@ -15,7 +15,7 @@ const (
 )
 
 var cfgFile string
-var projects []project.Project
+var cfg Config
 
 var rootCmd = &cobra.Command{
 	Use:   "cauldrongo",
@@ -37,6 +37,10 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", DefaultConfigFile, "config file (default is .cauldrongo.yml)")
+}
+
+type Config struct {
+	Projects []project.Project `mapstructure:"projects"`
 }
 
 func initConfig() {
@@ -62,7 +66,7 @@ func initConfig() {
 		return
 	}
 
-	err := viper.UnmarshalKey("projects", &projects)
+	err := viper.Unmarshal(&cfg)
 	if err != nil {
 		fmt.Println("Can't unmarshal projects:", err)
 		os.Exit(1)

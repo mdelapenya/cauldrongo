@@ -14,12 +14,22 @@ const (
 	metricsQueryStringFormat = "from=%s&to=%s&tab=%s"
 )
 
-func NewURL(projectID int, from, to, tab string) url.URL {
+func NewURL(projectID int, from, to, tab string, repoURLs []string) url.URL {
+	rawQuery := fmt.Sprintf(metricsQueryStringFormat, from, to, tab)
+	if len(repoURLs) > 0 {
+		queryRepos := ""
+		for _, repoURL := range repoURLs {
+			queryRepos += "&" + url.QueryEscape("repo_url[]") + "=" + url.QueryEscape(repoURL)
+		}
+
+		rawQuery = rawQuery + queryRepos
+	}
+
 	return url.URL{
 		Scheme:   baseScheme,
 		Host:     baseURL,
 		Path:     fmt.Sprintf(metricsURLFormat, projectID),
-		RawQuery: fmt.Sprintf(metricsQueryStringFormat, from, to, tab),
+		RawQuery: rawQuery,
 	}
 }
 

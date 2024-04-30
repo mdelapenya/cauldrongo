@@ -7,7 +7,7 @@ import (
 	"github.com/mdelapenya/cauldrongo/project"
 )
 
-var testProject = project.Project{ID: 1, Name: "Test Project"}
+var testProject = project.Project{ID: 1, Name: "Test Project", RepoURL: []string{"http://example.com/repo", "http://example.com/repo.git"}}
 
 type testWriter struct {
 	data []byte
@@ -69,27 +69,21 @@ func TestConsoleFormatter(t *testing.T) {
 | Commits Overview                                |  1587 |
 | Issues Overview                                 |     0 |
 | Reviews Overview                                |     0 |
-| Questions Overview                              |       |
 | Commits Last Year Overview                      |     0 |
 | Issues Last Year Overview                       |     0 |
 | Reviews Last Year Overview                      |     0 |
-| Questions Last Year Overview                    |       |
 | Commits YoY Overview                            |  0.00 |
 | Issues YoY Overview                             |  0.00 |
 | Reviews YoY Overview                            |  0.00 |
-| Questions YoY Overview                          |     0 |
 | Commit Authors Overview                         |     0 |
 | Issue Submitters Overview                       |     0 |
 | Review Submitters Overview                      |     0 |
-| Question Authors Overview                       |       |
 | Commit Authors Last Year Overview               |     0 |
 | Issue Submitters Last Year Overview             |     0 |
 | Review Submitters Last Year Overview            |     0 |
-| Question Authors Last Year Overview             |       |
 | Commit Authors YoY Overview                     |  0.00 |
 | Issue Submitters YoY Overview                   |  0.00 |
 | Review Submitters YoY Overview                  |  0.00 |
-| Question Authors YoY Overview                   |     0 |
 | Issues Median Time To Close Overview            |  0.00 |
 | Reviews Median Time To Close Overview           |  0.00 |
 | Issues Median Time To Close Last Year Overview  |  0.00 |
@@ -123,7 +117,7 @@ func TestConsoleFormatter(t *testing.T) {
 		t.Run(tt.name, func(innerT *testing.T) {
 			innerT.Parallel()
 
-			consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", tt.writer)
+			consoleFormatter := cauldron.NewConsoleFormatter(testProject, "2021-01-01", "2021-12-31", "activity-overview", tt.writer)
 
 			err := consoleFormatter.Format(tt.printable)
 			if err != nil {
@@ -133,8 +127,10 @@ func TestConsoleFormatter(t *testing.T) {
 			formatted := string(tt.writer.data)
 
 			expected := `Project: Test Project (1)
+Repo URLs: [http://example.com/repo http://example.com/repo.git]
 From: 2021-01-01
 To: 2021-12-31
+Tab: activity-overview
 `
 			expected += tt.expected
 
@@ -148,7 +144,7 @@ To: 2021-12-31
 func TestJSONFormatter(t *testing.T) {
 	w := &testWriter{}
 	// using tab as indent
-	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "	", w)
+	jsonFormatter := cauldron.NewJSONFormatter(testProject, "2021-01-01", "2021-12-31", "activity-overview", "	", w)
 
 	a := &cauldron.Activity{}
 	a.CommitsActivityOverview = 15
@@ -165,10 +161,15 @@ func TestJSONFormatter(t *testing.T) {
 	expected := `{
 	"project": {
 		"id": 1,
-		"name": "Test Project"
+		"name": "Test Project",
+		"RepoURL": [
+			"http://example.com/repo",
+			"http://example.com/repo.git"
+		]
 	},
 	"from": "2021-01-01",
 	"to": "2021-12-31",
+	"tab": "activity-overview",
 	"response": {
 		"commits_activity_overview": 15,
 		"lines_commit_activity_overview": "",
