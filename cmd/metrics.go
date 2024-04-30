@@ -71,14 +71,6 @@ func metricsRun(projects []project.Project, from string, to string, tab string, 
 
 		writers[index] = projectWriter
 
-		var formatter cauldron.Formatter
-		switch format {
-		case "json":
-			formatter = cauldron.NewJSONFormatter(p, from, to, tab, "  ", projectWriter)
-		default:
-			formatter = cauldron.NewConsoleFormatter(p, from, to, tab, projectWriter)
-		}
-
 		var urls []url.URL
 		if tab == "" {
 			urls = make([]url.URL, 0, 4)
@@ -152,6 +144,16 @@ func metricsRun(projects []project.Project, from string, to string, tab string, 
 
 			if err := json.Unmarshal(bs, printable); err != nil {
 				return fmt.Errorf("error unmarshalling metrics: %w", err)
+			}
+
+			urlTab := urls[i].Query().Get("tab")
+
+			var formatter cauldron.Formatter
+			switch format {
+			case "json":
+				formatter = cauldron.NewJSONFormatter(p, from, to, urlTab, "  ", projectWriter)
+			default:
+				formatter = cauldron.NewConsoleFormatter(p, from, to, urlTab, projectWriter)
 			}
 
 			if err := formatter.Format(printable); err != nil {
