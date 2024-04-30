@@ -55,14 +55,30 @@ There is a global flag `--config`, that can be used to specify the path to the c
 projects:
 - id: 2296
   name: testcontainers-go
+  repo_url:
+    - https://github.com/testcontainers/testcontainers-go
+    - https://github.com/testcontainers/testcontainers-go.git
 - id: 7264
   name: testcontainers-java
+  repo_url:
+    - https://github.com/testcontainers/testcontainers-java
+    - https://github.com/testcontainers/testcontainers-java.git
 - id: 7265
   name: testcontainers-dotnet
+  repo_url:
+    - https://github.com/testcontainers/testcontainers-dotnet
+    - https://github.com/testcontainers/testcontainers-dotnet.git
 - id: 7266
   name: testcontainers-node
+  repo_url:
+    - https://github.com/testcontainers/testcontainers-node
+    - https://github.com/testcontainers/testcontainers-node.git
 - id: 7607
   name: testcontainers-ruby
+  repo_url:
+    - https://github.com/testcontainers/testcontainers-ruby
+    - https://github.com/testcontainers/testcontainers-ruby.git
+
 ```
 
 There is a sample configuration file in the `root` directory of the project, named `.sample-cauldrongo.yaml`.
